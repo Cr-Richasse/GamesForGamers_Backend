@@ -4,6 +4,7 @@ import com.example.GamesForGamers.model.Usuario;
 import com.example.GamesForGamers.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder; // <--- NUEVO IMPORT
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,11 +12,14 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/usuarios")
-@CrossOrigin(origins = "http://localhost:3000")
+// @CrossOrigin ya está manejado globalmente en SecurityConfig, así que lo quitamos de aquí para evitar conflictos
 public class UsuarioController {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder; // <--- INYECTAMOS EL ENCRIPTADOR
 
     @GetMapping
     public List<Usuario> getAllUsuarios() {
@@ -29,8 +33,19 @@ public class UsuarioController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // --- REGISTRO DE USUARIO ---
     @PostMapping
     public Usuario createUsuario(@RequestBody Usuario usuario) {
+        // 1. Encriptamos la contraseña antes de guardar
+        String passwordEncriptada = passwordEncoder.encode(usuario.getPassword());
+        usuario.setPassword(passwordEncriptada);
+
+        // 2. Asignamos valores por defecto si faltan (para evitar nulos)
+        if (usuario.getPermisosAdmin() == null) {
+            usuario.setPermisosAdmin(false);
+        }
+
+        // 3. Guardamos en BD
         return usuarioRepository.save(usuario);
     }
 
@@ -43,14 +58,24 @@ public class UsuarioController {
 
             usuarioExistente.setNombreUsuario(detalles.getNombreUsuario());
             usuarioExistente.setEmail(detalles.getEmail());
-            usuarioExistente.setPassword(detalles.getPassword());
+
+            // Lógica especial para Password: Solo encriptar si viene una nueva
+            if (detalles.getPassword() != null && !detalles.getPassword().isEmpty()) {
+                String nuevaPassEncriptada = passwordEncoder.encode(detalles.getPassword());
+                usuarioExistente.setPassword(nuevaPassEncriptada);
+            }
+
             usuarioExistente.setNombre(detalles.getNombre());
             usuarioExistente.setRut(detalles.getRut());
             usuarioExistente.setDireccion(detalles.getDireccion());
             usuarioExistente.setCiudad(detalles.getCiudad());
             usuarioExistente.setRegion(detalles.getRegion());
-            usuarioExistente.setComuna(usuarioExistente.getNombreUsuario());
-            usuarioExistente.setPermisosAdmin(detalles.getPermisosAdmin());
+            usuarioExistente.setComuna(detalles.getComuna());
+
+            // Solo actualizamos permisos si se envían explícitamente (seguridad)
+            if (detalles.getPermisosAdmin() != null) {
+                usuarioExistente.setPermisosAdmin(detalles.getPermisosAdmin());
+            }
 
             return ResponseEntity.ok(usuarioRepository.save(usuarioExistente));
         } else {
