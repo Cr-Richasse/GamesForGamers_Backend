@@ -4,6 +4,7 @@ import com.example.GamesForGamers.dto.OrdenRequest;
 import com.example.GamesForGamers.model.*;
 import com.example.GamesForGamers.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort; // Importante para ordenar por fecha
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,21 @@ public class OrdenController {
     @Autowired
     private VideojuegoRepository videojuegoRepository;
 
-    // --- NUEVO ENDPOINT: VER HISTORIAL ---
+    // --- NUEVO: Endpoint para Admin (Ver todas las ventas ordenadas por fecha) ---
+    @GetMapping("/todas")
+    public List<Orden> obtenerTodasLasOrdenes() {
+        return ordenRepository.findAll(Sort.by(Sort.Direction.DESC, "fecha"));
+    }
+
+    // --- NUEVO: Endpoint para ver detalle de una orden específica por ID ---
+    @GetMapping("/{id}")
+    public ResponseEntity<Orden> obtenerOrdenPorId(@PathVariable Long id) {
+        return ordenRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // --- ENDPOINT EXISTENTE: VER HISTORIAL DE UN USUARIO ---
     @GetMapping("/usuario/{usuarioId}")
     public List<Orden> obtenerOrdenesPorUsuario(@PathVariable Long usuarioId) {
         return ordenRepository.findByUsuarioId(usuarioId);
