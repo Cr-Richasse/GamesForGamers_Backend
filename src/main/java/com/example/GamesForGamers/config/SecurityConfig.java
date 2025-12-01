@@ -23,8 +23,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        // AGREGAR AQUÍ "/api/ordenes/**" para permitir guardar compras
+                        // === RUTAS PÚBLICAS ===
+                        // API Endpoints
                         .requestMatchers("/api/usuarios/**", "/api/videojuegos/**", "/api/auth/**", "/api/ordenes/**").permitAll()
+
+                        // Swagger / OpenAPI Endpoints (IMPORTANTE)
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
                         .anyRequest().authenticated()
                 );
@@ -35,11 +39,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

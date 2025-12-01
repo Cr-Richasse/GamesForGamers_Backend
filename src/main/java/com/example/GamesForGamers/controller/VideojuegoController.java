@@ -3,6 +3,8 @@ package com.example.GamesForGamers.controller;
 import com.example.GamesForGamers.dto.VideojuegoDto;
 import com.example.GamesForGamers.model.Videojuego;
 import com.example.GamesForGamers.repository.VideojuegoRepository;
+import io.swagger.v3.oas.annotations.Operation; // Importación para documentar métodos
+import io.swagger.v3.oas.annotations.tags.Tag; // Importación para etiquetar la clase
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +15,9 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/videojuegos")
-@CrossOrigin(origins = "http://localhost:5173")
+// 1. Etiquetamos el controlador para que aparezca en Swagger UI
+@Tag(name = "Catálogo de Videojuegos", description = "Gestión del inventario de juegos, stock y descuentos.")
+// 2. Eliminamos CrossOrigin local si ya está en SecurityConfig (para limpieza)
 public class VideojuegoController {
 
     @Autowired
@@ -38,6 +42,8 @@ public class VideojuegoController {
         return dto;
     }
 
+    // --- GET ALL ---
+    @Operation(summary = "Obtener todos los juegos", description = "Devuelve una lista completa de videojuegos disponibles, usados por el catálogo principal.")
     @GetMapping
     public List<VideojuegoDto> getAllVideojuegos() {
         List<Videojuego> juegos = videojuegoRepository.findAll();
@@ -46,6 +52,8 @@ public class VideojuegoController {
                 .collect(Collectors.toList());
     }
 
+    // --- GET BY ID ---
+    @Operation(summary = "Obtener juego por ID", description = "Devuelve un único juego por su ID para su visualización o edición.")
     @GetMapping("/{id}")
     public ResponseEntity<VideojuegoDto> getVideojuegoById(@PathVariable Long id) {
         return videojuegoRepository.findById(id)
@@ -53,11 +61,15 @@ public class VideojuegoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // --- POST (CREAR NUEVO) ---
+    @Operation(summary = "Crear nuevo videojuego", description = "Agrega un nuevo título al inventario (usado por el Panel Admin).")
     @PostMapping
     public Videojuego createVideojuego(@RequestBody Videojuego videojuego) {
         return videojuegoRepository.save(videojuego);
     }
 
+    // --- PUT (ACTUALIZAR) ---
+    @Operation(summary = "Actualizar juego existente", description = "Modifica todos los detalles de un juego existente por su ID (usado por el Panel Admin).")
     @PutMapping("/{id}")
     public ResponseEntity<Videojuego> updateVideojuego(@PathVariable Long id, @RequestBody Videojuego detalles) {
         Optional<Videojuego> videojuegoOptional = videojuegoRepository.findById(id);
@@ -82,6 +94,8 @@ public class VideojuegoController {
         }
     }
 
+    // --- DELETE ---
+    @Operation(summary = "Eliminar juego", description = "Elimina un juego del inventario por su ID.")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVideojuego(@PathVariable Long id) {
         if (videojuegoRepository.existsById(id)) {
