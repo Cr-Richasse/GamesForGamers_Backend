@@ -12,7 +12,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/usuarios")
-// @CrossOrigin ya está manejado globalmente en SecurityConfig, así que lo quitamos de aquí para evitar conflictos
 public class UsuarioController {
 
     @Autowired

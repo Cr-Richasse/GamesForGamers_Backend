@@ -25,13 +25,11 @@ public class OrdenController {
     @Autowired
     private VideojuegoRepository videojuegoRepository;
 
-    // --- NUEVO: Endpoint para Admin (Ver todas las ventas ordenadas por fecha) ---
     @GetMapping("/todas")
     public List<Orden> obtenerTodasLasOrdenes() {
         return ordenRepository.findAll(Sort.by(Sort.Direction.DESC, "fecha"));
     }
 
-    // --- NUEVO: Endpoint para ver detalle de una orden específica por ID ---
     @GetMapping("/{id}")
     public ResponseEntity<Orden> obtenerOrdenPorId(@PathVariable Long id) {
         return ordenRepository.findById(id)
@@ -39,13 +37,11 @@ public class OrdenController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // --- ENDPOINT EXISTENTE: VER HISTORIAL DE UN USUARIO ---
     @GetMapping("/usuario/{usuarioId}")
     public List<Orden> obtenerOrdenesPorUsuario(@PathVariable Long usuarioId) {
         return ordenRepository.findByUsuarioId(usuarioId);
     }
 
-    // --- ENDPOINT EXISTENTE (CREAR) ---
     @PostMapping
     @Transactional
     public ResponseEntity<?> crearOrden(@RequestBody OrdenRequest request) {

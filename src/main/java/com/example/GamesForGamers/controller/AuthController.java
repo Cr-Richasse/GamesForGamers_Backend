@@ -23,8 +23,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-
-        // 1. Buscar si el usuario existe por email
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(loginRequest.getEmail());
 
         if (usuarioOpt.isEmpty()) {
@@ -33,11 +31,8 @@ public class AuthController {
 
         Usuario usuario = usuarioOpt.get();
 
-        // 2. Verificar la contraseña
-        // passwordEncoder.matches(textoPlano, textoEncriptadoEnBD)
         if (passwordEncoder.matches(loginRequest.getPassword(), usuario.getPassword())) {
 
-            // 3. Si coincide, devolvemos éxito y datos seguros (sin password)
             return ResponseEntity.ok(new LoginResponse(
                     "Login exitoso",
                     usuario.getNombreUsuario(),

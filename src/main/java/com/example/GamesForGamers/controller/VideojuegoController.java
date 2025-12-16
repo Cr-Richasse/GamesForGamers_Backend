@@ -15,9 +15,8 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/videojuegos")
-// 1. Etiquetamos el controlador para que aparezca en Swagger UI
+@CrossOrigin(origins = "*")
 @Tag(name = "Catálogo de Videojuegos", description = "Gestión del inventario de juegos, stock y descuentos.")
-// 2. Eliminamos CrossOrigin local si ya está en SecurityConfig (para limpieza)
 public class VideojuegoController {
 
     @Autowired
